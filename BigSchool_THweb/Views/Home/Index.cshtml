@@ -1,0 +1,92 @@
+﻿@model IEnumerable<BigSchool_THweb.Models.Course>
+
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Thông tin các khóa học</h2>
+<div class="row">
+    <ul class="course">
+        @foreach(var course in Model)
+        {
+            <li>
+                <div class="date">
+                    <div class="month">
+                        @course.DateTime.ToString("MM")
+                    </div>
+                    <div class="day">
+                        @course.DateTime.ToString("dd")
+                    </div>
+                </div>
+                <div class="details">
+                    <span class="lecture">
+                        @course.Name
+                        @if (ViewBag.LoginUser != null)
+                        {
+                            if (course.isShowFollow)
+                            {
+                                <button data-user-id="@course.LecturerId" class="btn btn-default btn-sm js-tongle-follow">Follow?</button>
+                            }
+                            else
+                            {
+                                <button data-user-id="@course.LecturerId" class="btn btn-success btn-sm js-tongle-follow">Following</button>
+                            }
+
+                        }
+
+                    </span>
+                    <span class="category">
+                        @if (ViewBag.LoginUser != null)
+                        {
+                            if (course.isShowGoing)
+                            {
+                                <button data-course-id="@course.Id" class="btn btn-default btn-sm js-tongle-attendance">Going?</button>
+                            }
+                            else
+                            {
+                                <button data-course-id="@course.Id" class="btn btn-info btn-sm js-tongle-attendance">Going</button>
+                            }
+
+                        }
+                        @course.Category.Name
+                    </span>
+                </div>
+            </li>
+        }
+    </ul>
+
+</div>
+@section scripts
+{
+    <script>
+        $(document).ready(function () {
+            $(".js-tongle-attendance").click(function (e) {
+                var button = $(e.target);
+                $.post("/api/attendances", { Id: button.attr("data-course-id") })
+                    .done(function () {
+                        alert("Đăng ký khóa học thành công!");
+                        button.removeClass("btn-default");
+                        button.addClass("btn-info");
+                        button.text("Going");
+                    }).fail(function () {
+                        alert("Something fail");
+                    });
+            });
+            $(".js-tongle-follow").click(function (e) {
+                var button = $(e.target);
+                $.post("/api/followings", { FolloweeId: button.attr("data-user-id") })
+                    .done(function () {
+                        button.addClass("btn-success");
+                        button.text("Following");
+                    }).fail(function () {
+                        alert("Something fail");
+                    });
+            });
+        });
+    </script>
+
+}
+
+
+
